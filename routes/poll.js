@@ -27,7 +27,7 @@ router.post('/', (req, res) => {
   };
 
   new Vote(newVote).save().then(vote => {
-    pusher.trigger('os-poll', 'os-vote', {
+    pusher.trigger('voting-poll', 'os-vote', {
       points: parseInt(vote.points),
       os: vote.os
     });

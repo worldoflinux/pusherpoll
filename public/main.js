@@ -24,6 +24,7 @@ fetch("http://localhost:3000/poll")
         let votes = data.votes;
         let totalVotes = votes.length;
         document.querySelector('#chartTitle').textContent = `Total Votes: ${totalVotes}`;
+       // document.querySelector('#pieChart').textContent= `Total Votes: ${totalVotes}`;
 
         let voteCounts = {
             Windows: 0,
@@ -45,49 +46,106 @@ fetch("http://localhost:3000/poll")
         ];
             
         const chartContainer = document.querySelector('#chartContainer');
+        const pieContainer = document.querySelector('#pieContainer');
         
-        if(chartContainer){
+        if (chartContainer) {
 
             // Listen for the event.
-            document.addEventListener('votesAdded', function (e) { 
+            document.addEventListener('votesAdded', function (e) {
                 document.querySelector('#chartTitle').textContent = `Total Votes: ${e.detail.totalVotes}`;
             });
-            
+
             const chart = new CanvasJS.Chart('chartContainer', {
                 animationEnabled: true,
-                theme: 'theme1',
-                data:[
+                theme: 'light2',
+                title: {
+                    text: "Vot pe Candidati la Presedentie"
+                },
+                subtitles: [{
+                    text: "Romania Noiembrie 2019",
+                    fontSize: 16
+                }],
+                data: [
                     {
                         type: 'column',
-                        dataPoints: dataPoints
+                        dataPoints: dataPoints,
+                        indexLabelFontSize: 18,
+                        //radius: 80,
+                        indexLabel: "{label} - {y}",
+                        yValueFormatString: "###0.0\"%\""
+                        //click: explodePie
                     }
                 ]
             });
             chart.render();
-        
-             // Enable pusher logging - don't include this in production
-             Pusher.logToConsole = true;
-        
-             var pusher = new Pusher('355bbcc1238451dd1d93', {
-               cluster: 'ap2',
-               encrypted: true
-             });
-         
-             var channel = pusher.subscribe('os-poll');
 
-             channel.bind('os-vote', function(data) {
-               dataPoints.forEach((point)=>{
-                   if(point.label==data.os)
-                   {
-                        point.y+=data.points;
-                        totalVotes+=data.points;
-                        event = new CustomEvent('votesAdded',{detail:{totalVotes:totalVotes}});
+            // Enable pusher logging - don't include this in production
+            Pusher.logToConsole = true;
+
+            var pusher = new Pusher('3150db8636b70635f80b', {
+                cluster: 'eu',
+                encrypted: true
+            });
+
+            var channel = pusher.subscribe('voting-poll');
+
+            channel.bind('os-vote', function (data) {
+                dataPoints.forEach((point) => {
+                    if (point.label == data.os) {
+                        point.y += data.points;
+                        totalVotes += data.points;
+                        event = new CustomEvent('votesAdded', { detail: { totalVotes: totalVotes } });
                         // Dispatch the event.
                         document.dispatchEvent(event);
-                   }
-               });
-               chart.render();
-             });
+                    }
+                });
+                chart.render();
+                
+            });
         }
+if(pieContainer){
+    document.addEventListener('votesAdded', function (e) {
+        document.querySelector('#pieChart').textContent = `Total Votes: ${e.detail.totalVotes}`;
+    });
 
+    var pieChart = new CanvasJS.Chart('pieContainer', {
+        animationEnabled: true,
+        theme: 'light2',
+        data: [{
+            type: "pie",
+            indexLabelFontSize: 18,
+            radius: 80,
+            indexLabel: "{label} - {y}",
+            yValueFormatString: "###0.0\"%\"",
+           // click: explodePie,
+            dataPoints: dataPoints
+                
+        
+        }]
+    });
+    pieChart.render();
+
+    var pusher = new Pusher('3150db8636b70635f80b', {
+        cluster: 'eu',
+        encrypted: true
+    });
+
+    var channel = pusher.subscribe('voting-poll');
+
+    channel.bind('os-vote', function (data) {
+        dataPoints.forEach((point) => {
+            if (point.label == data.os) {
+                point.y += data.points;
+                totalVotes += data.points;
+                event = new CustomEvent('votesAdded', { detail: { totalVotes: totalVotes } });
+                // Dispatch the event.
+                document.dispatchEvent(event);
+            }
+        });
+        pieChart.render();
+
+       
+        
+    });
+}
 });
