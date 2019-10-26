@@ -59,11 +59,12 @@ fetch("http://localhost:3000/poll")
                 animationEnabled: true,
                 theme: 'light2',
                 title: {
-                    text: "Vot pe Candidati la Presedentie"
+                    text: "Vot pe Candidati la Presedentie",
+                    fontSize: 18
                 },
                 subtitles: [{
                     text: "Romania Noiembrie 2019",
-                    fontSize: 16
+                    fontSize: 18
                 }],
                 data: [
                     {
@@ -80,7 +81,7 @@ fetch("http://localhost:3000/poll")
             chart.render();
 
             // Enable pusher logging - don't include this in production
-            Pusher.logToConsole = true;
+     //       Pusher.logToConsole = true;
 
             var pusher = new Pusher('3150db8636b70635f80b', {
                 cluster: 'eu',
@@ -103,6 +104,8 @@ fetch("http://localhost:3000/poll")
                 
             });
         }
+
+
 if(pieContainer){
     document.addEventListener('votesAdded', function (e) {
         document.querySelector('#pieChart').textContent = `Total Votes: ${e.detail.totalVotes}`;
@@ -142,6 +145,7 @@ if(pieContainer){
                 document.dispatchEvent(event);
             }
         });
+        
         pieChart.render();
 
        
